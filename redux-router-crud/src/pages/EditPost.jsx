@@ -1,33 +1,35 @@
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import usePostDetails from "../hooks/use-post-details";
+import { useDispatch } from "react-redux";
+import { editPost } from "../state/postSlice";
 import { useNavigate } from "react-router-dom";
-import { insertPost } from "../state/postSlice";
 import withGuard from "../util/withGuard";
 
-import { Form, Button } from "react-bootstrap";
 import Loading from "../components/Loading";
+import { Form, Button } from "react-bootstrap";
 
-const AddPost = (props) => {
-  console.log(props);
-  const navigate = useNavigate();
+const EditPost = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error, record } = usePostDetails();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const { loading, error } = useSelector((state) => state.posts);
+
+  useEffect(() => {
+    if (record && !title && !description) {
+      setTitle(record?.title);
+      setDescription(record?.description);
+    }
+  }, [record, title, description]);
 
   const formHandler = (e) => {
     e.preventDefault();
-    const id = Math.floor(Math.random() * 500);
-    dispatch(insertPost({ id, title, description }))
+    dispatch(editPost({ id: record.id, title, description }))
       .unwrap()
-      .then(() => {
-        navigate("/");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      .then(() => navigate("/"));
   };
+
   return (
     <Form onSubmit={formHandler}>
       <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -56,4 +58,4 @@ const AddPost = (props) => {
   );
 };
 
-export default withGuard(AddPost);
+export default withGuard(EditPost);
