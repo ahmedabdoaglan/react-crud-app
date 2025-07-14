@@ -1,5 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+// API Base URL - Updated for production
+const API_URL = "https://react-crud-api-ahmed.vercel.app/api";
+
 const initialState = { records: [], loading: false, error: null, record: null };
 
 export const fetchPosts = createAsyncThunk(
@@ -7,7 +10,7 @@ export const fetchPosts = createAsyncThunk(
   async (_, thunkAPI) => {
     const { rejectWithValue } = thunkAPI;
     try {
-      const res = await fetch("http://localhost:5000/posts");
+      const res = await fetch(`${API_URL}/posts`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -24,7 +27,7 @@ export const fetchPost = createAsyncThunk(
   async (id, thunkAPI) => {
     const { rejectWithValue } = thunkAPI;
     try {
-      const res = await fetch(`http://localhost:5000/posts/${id}`);
+      const res = await fetch(`${API_URL}/posts/${id}`);
       // Check if response is ok before trying to parse JSON
       if (!res.ok) {
         throw new Error(`Post not found! status: ${res.status}`);
@@ -42,7 +45,7 @@ export const deletePost = createAsyncThunk(
   async (id, thunkAPI) => {
     const { rejectWithValue } = thunkAPI;
     try {
-      const res = await fetch(`http://localhost:5000/posts/${id}`, {
+      const res = await fetch(`${API_URL}/posts/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -63,7 +66,7 @@ export const insertPost = createAsyncThunk(
     item.userId = auth.id;
 
     try {
-      const res = await fetch("http://localhost:5000/posts", {
+      const res = await fetch(`${API_URL}/posts`, {
         method: "POST",
         body: JSON.stringify(item),
         headers: {
@@ -86,8 +89,8 @@ export const editPost = createAsyncThunk(
   async (item, thunkAPI) => {
     const { rejectWithValue } = thunkAPI;
     try {
-      const res = await fetch(`http://localhost:5000/posts/${item.id}`, {
-        method: "PATCH",
+      const res = await fetch(`${API_URL}/posts/${item.id}`, {
+        method: "PUT", // Changed from PATCH to PUT to match the new API
         body: JSON.stringify(item),
         headers: {
           "Content-type": "application/json; charset=UTF-8",
@@ -114,7 +117,7 @@ const postSlice = createSlice({
     },
   },
   extraReducers: {
-    //get post
+    //get single post
     [fetchPost.pending]: (state) => {
       state.loading = true;
       state.error = null;
@@ -141,7 +144,7 @@ const postSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    //create post
+    //create new post
     [insertPost.pending]: (state) => {
       state.loading = true;
       state.error = null;
@@ -168,7 +171,7 @@ const postSlice = createSlice({
       state.error = action.payload;
     },
 
-    //edit post
+    //update post
     [editPost.pending]: (state) => {
       state.loading = true;
       state.error = null;
