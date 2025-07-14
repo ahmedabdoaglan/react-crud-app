@@ -16,7 +16,9 @@ const EditPost = React.lazy(() => import("./pages/EditPost"));
 const Details = React.lazy(() => import("./pages/Details"));
 
 const postParamHandler = ({ params }) => {
-  if (isNaN(params.id)) {
+  // Simple validation: check if ID exists and is not empty
+  const id = params.id;
+  if (!id || id.trim() === "") {
     throw new Response("Bad Request", {
       statusText: "please make sure to insert correct post ID",
       status: 400,

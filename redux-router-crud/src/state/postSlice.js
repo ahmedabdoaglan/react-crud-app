@@ -8,6 +8,9 @@ export const fetchPosts = createAsyncThunk(
     const { rejectWithValue } = thunkAPI;
     try {
       const res = await fetch("http://localhost:5000/posts");
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       const data = await res.json();
       return data;
     } catch (error) {
@@ -22,6 +25,10 @@ export const fetchPost = createAsyncThunk(
     const { rejectWithValue } = thunkAPI;
     try {
       const res = await fetch(`http://localhost:5000/posts/${id}`);
+      // Check if response is ok before trying to parse JSON
+      if (!res.ok) {
+        throw new Error(`Post not found! status: ${res.status}`);
+      }
       const data = await res.json();
       return data;
     } catch (error) {
@@ -35,9 +42,12 @@ export const deletePost = createAsyncThunk(
   async (id, thunkAPI) => {
     const { rejectWithValue } = thunkAPI;
     try {
-      await fetch(`http://localhost:5000/posts/${id}`, {
+      const res = await fetch(`http://localhost:5000/posts/${id}`, {
         method: "DELETE",
       });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       return id;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -60,6 +70,9 @@ export const insertPost = createAsyncThunk(
           "Content-type": "application/json; charset=UTF-8",
         },
       });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       const data = await res.json();
       return data;
     } catch (error) {
@@ -80,6 +93,9 @@ export const editPost = createAsyncThunk(
           "Content-type": "application/json; charset=UTF-8",
         },
       });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       const data = await res.json();
       return data;
     } catch (error) {
@@ -91,7 +107,12 @@ export const editPost = createAsyncThunk(
 const postSlice = createSlice({
   name: "posts",
   initialState,
-  reducers: {},
+  reducers: {
+    // Add reducer to clean the record
+    cleanRecord: (state) => {
+      state.record = null;
+    },
+  },
   extraReducers: {
     //get post
     [fetchPost.pending]: (state) => {
@@ -163,4 +184,5 @@ const postSlice = createSlice({
   },
 });
 
+export const { cleanRecord } = postSlice.actions;
 export default postSlice.reducer;
